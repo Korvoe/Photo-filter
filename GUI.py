@@ -1,10 +1,15 @@
 import tkinter
 from tkinter import filedialog
 from PIL import Image, ImageTk
+import ctypes
+
+##Screen resolution
+screen_width = ctypes.windll.user32.GetSystemMetrics(0)
+screen_height = ctypes.windll.user32.GetSystemMetrics(1)
 
 class Filter(tkinter.Frame):
     def __init__(self, master = None):
-
+        
         # master is a Root frame.
         super().__init__(master)
         self.master = master
@@ -14,15 +19,17 @@ class Filter(tkinter.Frame):
         self.show_menu()
         self.master.config(menu = self.menubar)
 
+        self.img = 0
+        
         ##Frame for something else(No idea for what, but may be useful)
         self.frame_for_customization = tkinter.LabelFrame(self.master,
-                                               width = 350, height = 1000)
+                                               width = screen_width / 6, height = screen_height)
         self.frame_for_customization.pack(side = tkinter.RIGHT)
 
         ##Setting a frame and canvas inside of a main frame(master), at which the image will be shown.
         #######################################################################################################
-        self.image_frame_width = 1200
-        self.image_frame_height = 900
+        self.image_frame_width = screen_width / 1.5
+        self.image_frame_height = screen_height
 
         #Frame
         self.image_frame = tkinter.LabelFrame(self.master, relief = tkinter.SUNKEN,
@@ -37,10 +44,10 @@ class Filter(tkinter.Frame):
 
         ##Frame for filters, as you may notice from the variable`s name
         self.frame_for_filters = tkinter.LabelFrame(self.master,
-                                     width = 350, height = 1000)
-        self.frame_for_filters.pack(side = tkinter.RIGHT)
-
-
+                                     width = screen_width / 6, height = screen_height)
+        self.frame_for_filters.pack(side = tkinter.LEFT)
+        
+    
     def show_menu(self):
         self.menubar = tkinter.Menu(self.master)
         filemenu = tkinter.Menu(self.menubar)
@@ -48,19 +55,20 @@ class Filter(tkinter.Frame):
         ##Creating the File cascade of the menu, with commands "Open", "Save as" and "Quit!"
         self.menubar.add_cascade(label = "File", menu = filemenu)
         filemenu.add_command(label = "Open", command = self.open_image)
-        filemenu.add_command(label = "Save as", command = self.save_image)
+        filemenu.add_command(label = "Save", command = self.save_image)
+        filemenu.add_command(labe = "Save as", command = self.save_image_as)
         filemenu.add_separator()
-        filemenu.add_command(label = "Quit!", command = root.quit)
+        filemenu.add_command(label = "Quit", command = self.master.quit)
 
     def choose_filter(self):
-        self.v = tkinter.IntVar(None, 0)
+        self.v = tkinter.IntVar(None, 1)
 
         ##Creating radiobutton for each filter.
-        tkinter.Radiobutton(self.frame_for_filters, text = "Original", variable = self.v, value = 0,
+        r_b_1 = tkinter.Radiobutton(self.frame_for_filters, text = "Original", variable = self.v, value = 1,
                             command = self.original, pady = 5).pack(anchor = tkinter.W)
-        tkinter.Radiobutton(self.frame_for_filters, text = "Black and White", variable = self.v, value = 1,
+        r_b_2 = tkinter.Radiobutton(self.frame_for_filters, text = "Black and White", variable = self.v, value = 2,
                             command = self.black_and_white, pady = 5).pack(anchor = tkinter.W)
-        tkinter.Radiobutton(self.frame_for_filters, text = "Negative", variable = self.v, value = 2,
+        r_b_3 = tkinter.Radiobutton(self.frame_for_filters, text = "Negative", variable = self.v, value = 3,
                             command = self.negative, pady = 5).pack(anchor = tkinter.W)
 
     def open_image(self):
@@ -68,16 +76,21 @@ class Filter(tkinter.Frame):
         ## and "self.image" will be used to keep an output of filter methods.
         self.path_to_image = str(tkinter.filedialog.askopenfile(title = "Select image",
                                         filetypes = (("jpeg files","*.jpg"), ("all files","*.*"))).name)
+        if self.img == 0:
+            self.choose_filter()
+
         self.img = Image.open(self.path_to_image)
         self.image = self.img
 
         self.show_image()
-        self.choose_filter()
 
     def save_image(self):
+        self.image.save(self.path_to_image)
+
+    def save_image_as(self):
         ##Saving an image in the chosen destination and with chosen name.
         path_and_name_to_save = tkinter.filedialog.asksaveasfilename(title = "Save as",
-                                        filetypes = (("jpeg files","*.jpg"), ("all files","*.*")))
+                                        filetypes = (("jpeg files","*.jpeg"), ("all files","*.*")))
         self.image.save(path_and_name_to_save)
 
     def show_image(self):
@@ -128,10 +141,9 @@ class Filter(tkinter.Frame):
         self.show_image()
 #######################################################################################
 
-
 ##Initialization of the program
 root = tkinter.Tk()
 root.title("Filter for images")
-root.geometry("1800x1000")
+root.geometry(str(screen_width)+"x"+str(screen_height))
 Filter_program = Filter(master = root)
 Filter_program.mainloop()
