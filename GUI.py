@@ -22,9 +22,9 @@ class Filter(tkinter.Frame):
         self.img = 0
         
         ##Frame for something else(No idea for what, but may be useful)
-        self.frame_for_customization = tkinter.LabelFrame(self.master,
+        self.frame_for_configurations = tkinter.Frame(self.master, bd = 3, relief = tkinter.SUNKEN,
                                                width = screen_width / 6, height = screen_height)
-        self.frame_for_customization.pack(side = tkinter.RIGHT)
+        self.frame_for_configurations.pack(side = tkinter.RIGHT)
 
         ##Setting a frame and canvas inside of a main frame(master), at which the image will be shown.
         #######################################################################################################
@@ -32,7 +32,7 @@ class Filter(tkinter.Frame):
         self.image_frame_height = screen_height
 
         #Frame
-        self.image_frame = tkinter.LabelFrame(self.master, relief = tkinter.SUNKEN,
+        self.image_frame = tkinter.Frame(self.master, relief = tkinter.SUNKEN,
                     width = self.image_frame_width, height = self.image_frame_height, bd = 5)
         self.image_frame.pack(side = tkinter.RIGHT)
 
@@ -43,9 +43,9 @@ class Filter(tkinter.Frame):
         #######################################################################################################
 
         ##Frame for filters, as you may notice from the variable`s name
-        self.frame_for_filters = tkinter.LabelFrame(self.master,
+        self.frame_for_filters = tkinter.Frame(self.master, bd = 3, relief = tkinter.SUNKEN,
                                      width = screen_width / 6, height = screen_height)
-        self.frame_for_filters.pack(side = tkinter.LEFT)
+        self.frame_for_filters.pack(side = tkinter.RIGHT)
         
     
     def show_menu(self):
@@ -58,19 +58,19 @@ class Filter(tkinter.Frame):
         filemenu.add_command(label = "Save", command = self.save_image)
         filemenu.add_command(labe = "Save as", command = self.save_image_as)
         filemenu.add_separator()
-        filemenu.add_command(label = "Quit", command = self.master.quit)
+        filemenu.add_command(label = "Quit", command = self.master.destroy)
 
     def choose_filter(self):
         self.v = tkinter.IntVar(None, 1)
 
         ##Creating radiobutton for each filter.
-        r_b_1 = tkinter.Radiobutton(self.frame_for_filters, text = "Original", variable = self.v, value = 1,
+        tkinter.Radiobutton(self.frame_for_filters, text = "Original", variable = self.v, value = 1,
                             command = self.original, pady = 5).pack(anchor = tkinter.W)
-        r_b_2 = tkinter.Radiobutton(self.frame_for_filters, text = "Black and White", variable = self.v, value = 2,
+        tkinter.Radiobutton(self.frame_for_filters, text = "Black and White", variable = self.v, value = 2,
                             command = self.black_and_white, pady = 5).pack(anchor = tkinter.W)
-        r_b_3 = tkinter.Radiobutton(self.frame_for_filters, text = "Negative", variable = self.v, value = 3,
+        tkinter.Radiobutton(self.frame_for_filters, text = "Negative", variable = self.v, value = 3,
                             command = self.negative, pady = 5).pack(anchor = tkinter.W)
-
+    
     def open_image(self):
         ##Opening the image. "self.img" will be used as an input for filter methods
         ## and "self.image" will be used to keep an output of filter methods.
