@@ -1,6 +1,6 @@
 import tkinter
 from tkinter import filedialog
-from PIL import Image, ImageTk, ImageEnhance
+from PIL import Image, ImageTk, ImageEnhance, ImageFilter
 import ctypes
 import math
 
@@ -78,7 +78,28 @@ class Filter(tkinter.Frame):
                             command = self.black_and_white, pady = 5).pack(anchor = tkinter.N)
         tkinter.Radiobutton(self.frame_for_filters, text = "Negative", variable = self.v, value = 3,
                             command = self.negative, pady = 5).pack(anchor = tkinter.N)
-
+        tkinter.Radiobutton(self.frame_for_filters, text = "Blur", variable = self.v, value = 4,
+                            command = self.blur, pady = 5).pack(anchor = tkinter.N)
+        tkinter.Radiobutton(self.frame_for_filters, text = "Detail", variable = self.v, value = 5,
+                            command = self.detail, pady = 5).pack(anchor = tkinter.N)
+        tkinter.Radiobutton(self.frame_for_filters, text = "Edges", variable = self.v, value = 6,
+                            command = self.edges, pady = 5).pack(anchor = tkinter.N)
+        tkinter.Radiobutton(self.frame_for_filters, text = "Median", variable = self.v, value = 7,
+                            command = self.median, pady = 5).pack(anchor = tkinter.N)
+        tkinter.Radiobutton(self.frame_for_filters, text = "Emboss", variable = self.v, value = 8,
+                            command = self.emboss, pady = 5).pack(anchor = tkinter.N)
+        tkinter.Radiobutton(self.frame_for_filters, text = "Contour", variable = self.v, value = 9,
+                            command = self.contour, pady = 5).pack(anchor = tkinter.N)
+        tkinter.Radiobutton(self.frame_for_filters, text = "Smooth", variable = self.v, value = 10,
+                            command = self.smooth, pady = 5).pack(anchor = tkinter.N)
+        tkinter.Radiobutton(self.frame_for_filters, text = "Max", variable = self.v, value = 11,
+                            command = self.max, pady = 5).pack(anchor = tkinter.N)
+        tkinter.Radiobutton(self.frame_for_filters, text = "Mode", variable = self.v, value = 12,
+                            command = self.mode, pady = 5).pack(anchor = tkinter.N)
+        
+        
+        
+        
     def image_configurations(self):
 ##################################
         brightness_var = ""
@@ -107,7 +128,7 @@ class Filter(tkinter.Frame):
         saturation_var = ""
         saturation_frame = tkinter.Frame(second_row_frame, bd = 3, relief = tkinter.SUNKEN)
         saturation_frame.pack(side = "left")
-        saturation_label = tkinter.Label(saturation_frame, text = "Rotation")
+        saturation_label = tkinter.Label(saturation_frame, text = "Saturation")
         saturation_label.pack()
         saturation_scale = tkinter.Scale(saturation_frame, orient = tkinter.VERTICAL, length = 100, command = self.saturation,
                                               from_ = -100, to = 100, variable = saturation_var)
@@ -128,7 +149,17 @@ class Filter(tkinter.Frame):
         horizontal_flip_checkbutton.pack()
         vertical_flip_checkbutton.pack()
 ##################################
-        
+        def apply_changes():
+            self.img = self.image
+            brightness_scale.set(0)
+            contrast_scale.set(0)
+            saturation_scale.set(0)
+            
+        apply_button_frame = tkinter.Frame(self.frame_for_configurations, bd = 3, relief = tkinter.SUNKEN)
+        apply_button_frame.pack(side = "top")
+        apply_button = tkinter.Button(apply_button_frame, text = "Apply changes", command = apply_changes)
+        apply_button.pack()
+            
     def saturation(self, var):
         converter = ImageEnhance.Color(self.img)
         self.image = converter.enhance((100 - int(var)) / 100)
@@ -172,7 +203,9 @@ class Filter(tkinter.Frame):
         source[B].paste(blue, None, None)
         self.image = Image.merge(self.img.mode, source)
         self.show_image()
+####################################################################################################
 
+        
     def open_image(self):
         ##Opening the image. "self.img" will be used as an input for filter methods
         ## and "self.image" will be used to keep an output of filter methods.
@@ -217,7 +250,7 @@ class Filter(tkinter.Frame):
 
 ######################FILTERS##################################################
     def original(self):
-        self.image = self.img
+        self.image = Image.open(self.path_to_image)
         self.show_image()
 
     def black_and_white(self):
@@ -242,6 +275,45 @@ class Filter(tkinter.Frame):
 
         self.image = Image.merge(self.img.mode, source)
         self.show_image()
+        
+##Nuriddin`s part
+    def blur(self):
+        self.image = self.img.filter(ImageFilter.BLUR)
+        self.show_image()
+
+    def detail(self):
+        self.image = self.img.filter(ImageFilter.DETAIL)
+        self.show_image()
+
+    def edges(self):
+        self.image = self.img.filter(ImageFilter.FIND_EDGES)
+        self.show_image()
+
+    def median(self):
+        self.image = self.img.filter(ImageFilter.MedianFilter(size=9))
+        self.show_image()
+
+##Akmal`s part
+    def emboss(self):
+        self.image = self.img.filter(ImageFilter.EMBOSS)
+        self.show_image()
+
+    def contour(self):
+        self.image = self.img.filter(ImageFilter.CONTOUR)
+        self.show_image()
+
+    def smooth(self):
+        self.image = self.img.filter(ImageFilter.SMOOTH)
+        self.show_image()
+
+    def max(self):
+        self.image = self.img.filter(ImageFilter.MinFilter(size=9))
+        self.show_image()
+
+    def mode(self):
+        self.image = self.img.filter(ImageFilter.ModeFilter(size=9))
+        self.show_image()
+        
 #######################################################################################
 
 ##Initialization of the program
