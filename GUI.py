@@ -1,7 +1,8 @@
 import tkinter
 from tkinter import filedialog
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageEnhance
 import ctypes
+import math
 
 ##Screen resolution
 screen_width = ctypes.windll.user32.GetSystemMetrics(0)
@@ -79,25 +80,70 @@ class Filter(tkinter.Frame):
                             command = self.negative, pady = 5).pack(anchor = tkinter.N)
 
     def image_configurations(self):
-        brightness_var = 0
+##################################
+        brightness_var = ""
         brightness_frame = tkinter.Frame(self.frame_for_configurations, bd = 3, relief = tkinter.SUNKEN)
-        brightness_frame.pack(side = tkinter.TOP)
+        brightness_frame.pack(side = "top")
         brightness_label = tkinter.Label(brightness_frame, text = "Brightness settings")
         brightness_label.pack()
         brightness_scale = tkinter.Scale(brightness_frame, orient = tkinter.HORIZONTAL, command = self.change_brightness,
                                          length = self.frame_for_configurations_width, from_ = -255, to = 255, variable = brightness_var)
         brightness_scale.set(0)
-        brightness_scale.pack(anchor = tkinter.CENTER)
+        brightness_scale.pack()
 
-        contrast_var = 1
-        contrast_frame = tkinter.Frame(self.frame_for_configurations, bd = 3, relief = tkinter.SUNKEN)
-        contrast_frame.pack(side = tkinter.TOP)
-        contrast_label = tkinter.Label(contrast_frame, text = "Contrast frame")
-        contrast_label.pack()
-        contrast_scale = tkinter.Scale(contrast_frame, orient = tkinter.HORIZONTAL, command = self.change_contrast,
-                                        from_ = 1, to = 100, variable = contrast_var)
-        contrast_scale.pack(anchor = tkinter.CENTER)
+##################################
+        second_row_frame = tkinter.Frame(self.frame_for_configurations, bd = 3, relief = tkinter.SUNKEN)
+        second_row_frame.pack(side = "top")
         
+        contrast_var = ""
+        contrast_frame = tkinter.Frame(second_row_frame, bd = 3, relief = tkinter.SUNKEN)
+        contrast_frame.pack(side = "left")
+        contrast_label = tkinter.Label(contrast_frame, text = "Contrast settings")
+        contrast_label.pack()
+        contrast_scale = tkinter.Scale(contrast_frame, orient = tkinter.VERTICAL, command = self.change_contrast, length = 100, 
+                                        from_ = 0, to = 100, variable = contrast_var)
+        contrast_scale.pack()
+
+        saturation_var = ""
+        saturation_frame = tkinter.Frame(second_row_frame, bd = 3, relief = tkinter.SUNKEN)
+        saturation_frame.pack(side = "left")
+        saturation_label = tkinter.Label(saturation_frame, text = "Rotation")
+        saturation_label.pack()
+        saturation_scale = tkinter.Scale(saturation_frame, orient = tkinter.VERTICAL, length = 100, command = self.saturation,
+                                              from_ = -100, to = 100, variable = saturation_var)
+        saturation_scale.pack()
+##################################
+
+        flip_frame = tkinter.Frame(self.frame_for_configurations, bd = 3, relief = tkinter.SUNKEN)
+        flip_frame.pack(side = "top")
+
+        flip_label = tkinter.Label(flip_frame, text = "Image flip")
+        horizontal_flip_value = ""
+        horizontal_flip_checkbutton = tkinter.Checkbutton(flip_frame, text = "Horizontal flip", variable = horizontal_flip_value,
+                                              command = self.horizontal_flip, onvalue = 1, offvalue = 0)
+        vertical_flip_value = ""
+        vertical_flip_checkbutton = tkinter.Checkbutton(flip_frame, text = "Vertical flip", variable = vertical_flip_value,
+                                              command = self.vertical_flip, onvalue = 1, offvalue = 0)
+        flip_label.pack()
+        horizontal_flip_checkbutton.pack()
+        vertical_flip_checkbutton.pack()
+##################################
+        
+    def saturation(self, var):
+        converter = ImageEnhance.Color(self.img)
+        self.image = converter.enhance((100 - int(var)) / 100)
+        self.show_image()
+
+    def horizontal_flip(self):
+        rotated_image = self.image.transpose(Image.FLIP_LEFT_RIGHT)
+        self.image = rotated_image
+        self.show_image()
+
+    def vertical_flip(self):
+        rotated_image = self.image.transpose(Image.FLIP_TOP_BOTTOM)
+        self.image = rotated_image
+        self.show_image()
+    
     def change_contrast(self, var):
         R, G, B = 0, 1, 2
         source = self.img.split()
@@ -126,7 +172,7 @@ class Filter(tkinter.Frame):
         source[B].paste(blue, None, None)
         self.image = Image.merge(self.img.mode, source)
         self.show_image()
-        
+
     def open_image(self):
         ##Opening the image. "self.img" will be used as an input for filter methods
         ## and "self.image" will be used to keep an output of filter methods.
@@ -152,21 +198,21 @@ class Filter(tkinter.Frame):
 
     def show_image(self):
         ##Resizing the image to fit in the frame.
-        width, height = self.image.size
-        if width > self.image_frame_width:
-            ratio = height / width
-            width = self.image_frame_width
-            height = width * ratio
-        elif height > self.image_frame_height:
-            ratio = width / height
-            height = self.image_frame_height
-            width = height * ratio
-        self.image = self.image.resize((int(width), int(height)), Image.ANTIALIAS)
+        self.width, self.height = self.image.size
+        if self.width > self.image_frame_width:
+            ratio = self.height / self.width
+            self.width = self.image_frame_width
+            self.height = self.width * ratio
+        elif self.height > self.image_frame_height:
+            ratio = self.width / self.height
+            self.height = self.image_frame_height
+            self.width = self.height * ratio
+        self.image = self.image.resize((int(self.width), int(self.height)), Image.ANTIALIAS)
 
         ##Placing the image in the center of a Frame, using canvas widget.
         self.image_for_canvas = ImageTk.PhotoImage(self.image)
-        self.image_canvas.create_image((self.image_frame_width - width)/2,
-                                 (self.image_frame_height - height)/2,
+        self.image_canvas.create_image((self.image_frame_width - self.width)/2,
+                                 (self.image_frame_height - self.height)/2,
                                          image = self.image_for_canvas, anchor = tkinter.NW)
 
 ######################FILTERS##################################################
