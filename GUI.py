@@ -27,7 +27,7 @@ class Filter(tkinter.Frame):
         self.frame_for_filters_width = screen_width / 6
         self.frame_for_filters_height = screen_height
         
-        ##Frame for something else(No idea for what, but may be useful)
+        ##Frame for configurations
         self.frame_for_configurations = tkinter.Frame(self.master, bd = 3, relief = tkinter.SUNKEN,
                                                width = self.frame_for_configurations_width, height = self.frame_for_configurations_height)
         self.frame_for_configurations.pack(sid = tkinter.RIGHT)
@@ -48,7 +48,7 @@ class Filter(tkinter.Frame):
         self.image_canvas.pack(expand = tkinter.YES, fill = tkinter.BOTH)
         #######################################################################################################
 
-        ##Frame for filters, as you may notice from the variable`s name
+        ##Frame for filters
         self.frame_for_filters = tkinter.Frame(self.master, bd = 3, relief = tkinter.SUNKEN,
                                      width = self.frame_for_filters_width, height = self.frame_for_filters_height)
         self.frame_for_filters.pack(side = tkinter.RIGHT, expand = 1)
