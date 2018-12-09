@@ -2,7 +2,6 @@ import tkinter
 from tkinter import filedialog
 from PIL import Image, ImageTk, ImageEnhance, ImageFilter
 import ctypes
-import math
 
 ##Screen resolution
 screen_width = ctypes.windll.user32.GetSystemMetrics(0)
@@ -10,7 +9,6 @@ screen_height = ctypes.windll.user32.GetSystemMetrics(1)
 
 class Filter(tkinter.Frame):
     def __init__(self, master = None):
-        
         # master is a Root frame.
         super().__init__(master)
         self.master = master
@@ -68,6 +66,8 @@ class Filter(tkinter.Frame):
         filemenu.add_separator()
         filemenu.add_command(label = "Quit", command = self.master.destroy)
 
+
+##Left frame
     def choose_filter(self):
         self.v = tkinter.IntVar(None, 1)
 
@@ -96,45 +96,45 @@ class Filter(tkinter.Frame):
                             command = self.max, pady = 5).pack(anchor = tkinter.N)
         tkinter.Radiobutton(self.frame_for_filters, text = "Mode", variable = self.v, value = 12,
                             command = self.mode, pady = 5).pack(anchor = tkinter.N)
+
         
-        
-        
-        
+##Right frame    
     def image_configurations(self):
-##################################
-        brightness_var = ""
+##################################Brightness
+        var = ""
         brightness_frame = tkinter.Frame(self.frame_for_configurations, bd = 3, relief = tkinter.SUNKEN)
         brightness_frame.pack(side = "top")
         brightness_label = tkinter.Label(brightness_frame, text = "Brightness settings")
         brightness_label.pack()
-        brightness_scale = tkinter.Scale(brightness_frame, orient = tkinter.HORIZONTAL, command = self.change_brightness,
-                                         length = self.frame_for_configurations_width, from_ = -255, to = 255, variable = brightness_var)
+        brightness_scale = tkinter.Scale(brightness_frame, orient = tkinter.HORIZONTAL,
+                                         command = lambda x: [self.change_brightness(x), contrast_scale.set(0), saturation_scale.set(0)],
+                                         length = self.frame_for_configurations_width, from_ = -255, to = 255, variable = var)
         brightness_scale.set(0)
         brightness_scale.pack()
 
-##################################
+##################################Contrast
         second_row_frame = tkinter.Frame(self.frame_for_configurations, bd = 3, relief = tkinter.SUNKEN)
         second_row_frame.pack(side = "top")
         
-        contrast_var = ""
         contrast_frame = tkinter.Frame(second_row_frame, bd = 3, relief = tkinter.SUNKEN)
         contrast_frame.pack(side = "left")
         contrast_label = tkinter.Label(contrast_frame, text = "Contrast settings")
         contrast_label.pack()
-        contrast_scale = tkinter.Scale(contrast_frame, orient = tkinter.VERTICAL, command = self.change_contrast, length = 100, 
-                                        from_ = 0, to = 100, variable = contrast_var)
+        contrast_scale = tkinter.Scale(contrast_frame, orient = tkinter.VERTICAL,
+                                       command = lambda x: [self.change_contrast(x), brightness_scale.set(0), saturation_scale.set(0)],
+                                       length = 100, from_ = 0, to = 100, variable = var)
         contrast_scale.pack()
 
-        saturation_var = ""
         saturation_frame = tkinter.Frame(second_row_frame, bd = 3, relief = tkinter.SUNKEN)
         saturation_frame.pack(side = "left")
         saturation_label = tkinter.Label(saturation_frame, text = "Saturation")
         saturation_label.pack()
-        saturation_scale = tkinter.Scale(saturation_frame, orient = tkinter.VERTICAL, length = 100, command = self.saturation,
-                                              from_ = -100, to = 100, variable = saturation_var)
+        saturation_scale = tkinter.Scale(saturation_frame, orient = tkinter.VERTICAL, 
+                                         command = lambda x: [self.change_saturation(x), contrast_scale.set(0), brightness_scale.set(0)],
+                                         length = 100, from_ = -100, to = 100, variable = var)
         saturation_scale.pack()
-##################################
-
+        
+##################################Horizontal and vertical flip
         flip_frame = tkinter.Frame(self.frame_for_configurations, bd = 3, relief = tkinter.SUNKEN)
         flip_frame.pack(side = "top")
 
@@ -148,7 +148,8 @@ class Filter(tkinter.Frame):
         flip_label.pack()
         horizontal_flip_checkbutton.pack()
         vertical_flip_checkbutton.pack()
-##################################
+        
+##################################Apply changes
         def apply_changes():
             self.img = self.image
             brightness_scale.set(0)
@@ -159,20 +160,21 @@ class Filter(tkinter.Frame):
         apply_button_frame.pack(side = "top")
         apply_button = tkinter.Button(apply_button_frame, text = "Apply changes", command = apply_changes)
         apply_button.pack()
-            
-    def saturation(self, var):
+
+##Image configurations` implementation
+    def change_saturation(self, var):
         converter = ImageEnhance.Color(self.img)
         self.image = converter.enhance((100 - int(var)) / 100)
         self.show_image()
 
     def horizontal_flip(self):
-        rotated_image = self.image.transpose(Image.FLIP_LEFT_RIGHT)
-        self.image = rotated_image
+        self.img = self.image.transpose(Image.FLIP_LEFT_RIGHT)
+        self.image = self.img
         self.show_image()
 
     def vertical_flip(self):
-        rotated_image = self.image.transpose(Image.FLIP_TOP_BOTTOM)
-        self.image = rotated_image
+        self.img = self.image.transpose(Image.FLIP_TOP_BOTTOM)
+        self.image = self.img
         self.show_image()
     
     def change_contrast(self, var):
@@ -205,10 +207,9 @@ class Filter(tkinter.Frame):
         self.show_image()
 ####################################################################################################
 
-        
+##Opening the image. "self.img" will be used as an input for filter methods
+## and "self.image" will be used to keep an output of filter methods.
     def open_image(self):
-        ##Opening the image. "self.img" will be used as an input for filter methods
-        ## and "self.image" will be used to keep an output of filter methods.
         self.path_to_image = str(tkinter.filedialog.askopenfile(title = "Select image",
                                         filetypes = (("jpeg files","*.jpg"), ("all files","*.*"))).name)
         if self.img == 0:
@@ -220,11 +221,12 @@ class Filter(tkinter.Frame):
 
         self.show_image()
 
+##Saving an image in the same path and with the same name
     def save_image(self):
         self.image.save(self.path_to_image)
 
+##Saving an image in the chosen destination and with chosen name.
     def save_image_as(self):
-        ##Saving an image in the chosen destination and with chosen name.
         path_and_name_to_save = tkinter.filedialog.asksaveasfilename(title = "Save as",
                                         filetypes = (("jpeg files","*.jpg"), ("all files","*.*")))
         self.image.save(path_and_name_to_save)
@@ -275,6 +277,24 @@ class Filter(tkinter.Frame):
 
         self.image = Image.merge(self.img.mode, source)
         self.show_image()
+
+    def median(self):
+        newimg = Image.new("RGB", (int(self.width), int(self.height)), "white")
+        members = [(0,0)] * 9
+        for i in range(1, self.width-1):
+            for j in range(1, self.height-1):
+                members[0] = self.img.getpixel((i-1,j-1))
+                members[1] = self.img.getpixel((i-1,j))
+                members[2] = self.img.getpixel((i-1,j+1))
+                members[3] = self.img.getpixel((i,j-1))
+                members[4] = self.img.getpixel((i,j))
+                members[5] = self.img.getpixel((i,j+1))
+                members[6] = self.img.getpixel((i+1,j-1))
+                members[7] = self.img.getpixel((i+1,j))
+                members[8] = self.img.getpixel((i+1,j+1))
+                members.sort()
+                self.image.putpixel((i,j),(members[4]))
+        self.show_image()
         
 ##Nuriddin`s part
     def blur(self):
@@ -287,10 +307,6 @@ class Filter(tkinter.Frame):
 
     def edges(self):
         self.image = self.img.filter(ImageFilter.FIND_EDGES)
-        self.show_image()
-
-    def median(self):
-        self.image = self.img.filter(ImageFilter.MedianFilter(size=9))
         self.show_image()
 
 ##Akmal`s part
